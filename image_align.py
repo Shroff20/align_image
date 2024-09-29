@@ -16,7 +16,14 @@ class ImageAlign():
         self.df_images = self.get_image_status()
 
     def __str__(self):
-        [print(f'{x} : {getattr(self, x)}') for x in dir(self) if not str.startswith(x, '__')]
+        #[print(f'{x} : {getattr(self, x)}') for x in dir(self) if not str.startswith(x, '__')]
+        print('\n\n____________________________________________________________')
+        for key, value in self.__dict__.items():
+            if type(value) == pd.DataFrame:
+                print(f' * {key} :\n{value}')
+            else:
+                print(f' * {key} : {value}')
+        print('____________________________________________________________')
         return ''
     
         
@@ -45,5 +52,5 @@ class ImageAlign():
         return df_images
 
 
-session = ImageAlign('.\images', '.png')
+session = ImageAlign(r'.\images', r'.png')
 print(session)
