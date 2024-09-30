@@ -86,9 +86,57 @@ class ImageAlign():
         self.df_xy = df_xy
         self.ax_image.imshow(img)
         self.plot_points()
-        self.ax_image.set_title(fullpath)
+        self.update_message(fullpath)
         #print(f'loaded {file}')
+
+        cid = self.fig.canvas.mpl_connect('button_press_event', self.onclick)
+
         self.fig.canvas.draw()
+
+
+    def update_message(self, msg):
+        print(msg)
+        self.ax_image.set_title(msg)
+
+
+    def onclick(self, event):
+
+        print(event)
+        ix, iy = event.xdata, event.ydata
+
+        if event.inaxes != self.ax_image:
+            return None
+
+        if (ix ==None) or (iy ==None):
+            return None
+
+        if event.button ==1: # left click, add point
+            ix = int(ix)
+            iy = int(iy)
+
+            msg = f'add point: x = {ix}, y = {iy}'
+            self.update_message(msg)
+
+            self.df_xy = self.df_xy._append( {'x':ix, 'y':iy} , ignore_index=True)
+
+        if event.button ==3 and len(self.df_xy)>0: # right click, remove point
+            d = (ix-self.df_xy['x'])**2 + (iy-self.df_xy['y'])**2
+            idx = d.idxmin()
+            self.df_xy = self.df_xy.drop(idx)
+            msg = f'remove point: index = {idx}'
+            self.update_message(msg)
+
+        # sort points and redraw
+        self.df_xy=self.df_xy.sort_values('x').reset_index(drop = True)
+        try:
+            self.hpoints.pop(0).remove()
+        except:
+            pass
+        self.plot_points()
+        print(self.df_xy)
+        self.fig.canvas.draw()
+        return self
+
 
 
 session = ImageAlign(r'.\images', r'.png')
