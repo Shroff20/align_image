@@ -66,7 +66,10 @@ class ImageAlign():
         fig.canvas.draw()
 
         return self
-    
+    def plot_points(self):
+        hpoints = self.ax_image.plot(self.df_xy['x'], self.df_xy['y'],  marker = 'o', markersize = 20, c = 'r', fillstyle = 'none', linestyle = '--')
+        self.hpoints = hpoints
+
     def plot_image(self, idx):
 
         fullpath = self.df_images.loc[idx, 'fullpath']
@@ -80,8 +83,9 @@ class ImageAlign():
         else:
             df_xy = pd.DataFrame(columns = ['x', 'y', 'user', 'datetime', 'filename'])
 
+        self.df_xy = df_xy
         self.ax_image.imshow(img)
-        #hpoints = plot_points(df_xy)
+        self.plot_points()
         self.ax_image.set_title(fullpath)
         #print(f'loaded {file}')
         self.fig.canvas.draw()
