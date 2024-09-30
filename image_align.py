@@ -6,6 +6,7 @@ import pandas as pd
 import os
 import tkinter as tk
 import glob
+import datetime
 
 matplotlib.use('Qt5Agg')
 
@@ -16,7 +17,7 @@ class ImageAlign():
         self.working_dir = working_dir
         self.image_ext = image_ext
         self.df_images = self.get_image_status()
-
+        self.user = os.getlogin()
 
     def __str__(self):
         #[print(f'{x} : {getattr(self, x)}') for x in dir(self) if not str.startswith(x, '__')]
@@ -66,9 +67,12 @@ class ImageAlign():
         fig.canvas.draw()
 
         return self
+    
+
     def plot_points(self):
         hpoints = self.ax_image.plot(self.df_xy['x'], self.df_xy['y'],  marker = 'o', markersize = 20, c = 'r', fillstyle = 'none', linestyle = '--')
         self.hpoints = hpoints
+
 
     def plot_image(self, idx):
 
@@ -87,6 +91,7 @@ class ImageAlign():
         self.ax_image.imshow(img)
         self.plot_points()
         self.update_message(fullpath)
+        self.cur_fullpath = fullpath
         #print(f'loaded {file}')
 
         cid = self.fig.canvas.mpl_connect('button_press_event', self.onclick)
@@ -101,7 +106,6 @@ class ImageAlign():
 
     def onclick(self, event):
 
-        print(event)
         ix, iy = event.xdata, event.ydata
 
         if event.inaxes != self.ax_image:
@@ -116,8 +120,10 @@ class ImageAlign():
 
             msg = f'add point: x = {ix}, y = {iy}'
             self.update_message(msg)
+            
+            current_time = datetime.datetime.now()
 
-            self.df_xy = self.df_xy._append( {'x':ix, 'y':iy} , ignore_index=True)
+            self.df_xy = self.df_xy._append( {'x':ix, 'y':iy, 'user': self.user , 'datetime': current_time, 'filename': self.cur_fullpath} , ignore_index=True)
 
         if event.button ==3 and len(self.df_xy)>0: # right click, remove point
             d = (ix-self.df_xy['x'])**2 + (iy-self.df_xy['y'])**2
